@@ -37,13 +37,8 @@ contract PoolLens {
         string tokenBSymbol;
     }
 
-   //events
-   event PoolAddressFetched(address indexed tokenA, address indexed tokenB, uint24 fee, address pool);
-   event LiquidityFetched(address indexed poolAddress, uint128 liquidity);
-
    function getPoolAddress(address tokenA, address tokenB, uint24 fee) external view returns (address pool){
     pool = IUniswapV3Factory(FACTORY_ADDRESS).getPool(tokenA, tokenB, fee);
-    emit PoolAddressFetched(tokenA, tokenB, fee, pool);
     return pool;
    }
 
@@ -59,8 +54,7 @@ contract PoolLens {
         info.tokenBSymbol = IERC20Metadata(info.tokenB).symbol();
         info.liquidity = IUniswapV3Pool(poolAddress).liquidity();
 
-        emit LiquidityFetched(poolAddress, info.liquidity);
-        return info;
+         return info;
 
     }
    

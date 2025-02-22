@@ -9,6 +9,9 @@ import hre from "hardhat";
 console.log("Test file is being read!")
 
 describe("PoolLens", function () {
+
+  this.timeout(60000);
+
   let poolLens: any;
   let  owner: any;
 
@@ -53,8 +56,20 @@ describe("PoolLens", function () {
       console.log("liquidity information for the pool")
       const info = await poolLens.getLiquidity(KNOWN_POOL);
       console.log("Liquidity info", info);
+
+      console.log("TokenA:", info.tokenA);
+      console.log("TokenB:", info.tokenB);
+      console.log("Fee:", info.fee);
+      console.log("Liquidity:", info.liquidity.toString());
+      console.log("TokenA Symbol:", info.tokenASymbol);
+      console.log("TokenB Symbol:", info.tokenBSymbol);
+
       expect(info.tokenA).to.equal(USDC);
       expect(info.tokenB).to.equal(WETH);
+      expect(info.fee).to.equal(3000);
+      expect(info.liquidity).to.be.gt(0);
+      expect(info.tokenASymbol).to.equal("USDC");
+      expect(info.tokenBSymbol).to.equal("WETH");
     })
   })
  
