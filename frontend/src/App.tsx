@@ -1,35 +1,31 @@
-//import { useState } from 'react'
-
 import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+//import  ConnectWallet  from './components/connectWallet';
+import PoolFinder from './components/poolFinder';
+import Liquidity from './components/liquidityFinder';
+import History from './components/history';
+
 
 function App() {
-
-
   return (
     <>
-      <h1>Pool Lens</h1>
-      <div className="card">
-        <p>
-          enter token A
-        <input type="text" placeholder="Enter token A" />
-        </p>
-        <p>
-          enter token B
-        <input type="text" placeholder="Enter token B" />
-        </p>
-        <p>
-          enter amount
-          <input type="text" placeholder="Enter amount" />
-      </p>
-          <button>get pool address</button>
-      </div>
-      <p className="read-the-docs">
-        Enter pool address
-      </p>
-      <input type="text" placeholder="Enter pool address" />
-      <button>get liquidity</button>
+    <Router>
+        <div>
+          <nav>
+            <Link to="/liquidityFinder">Liquidity</Link>
+            <Link to="/pool">Pool</Link>
+            <Link to="/history">History</Link>
+          </nav>
+          <Routes>
+            <Route path="/liquidityFinder" element={<Liquidity />} />
+            <Route path="/pool" element={<PoolFinder />} />
+            <Route path="/history" element={<History />} />
+          </Routes>
+        </div>
+      </Router>
+    
     </>
   )
 }
 
-export default App
+export default App;
