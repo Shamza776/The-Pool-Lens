@@ -41,13 +41,13 @@ contract PoolLens {
    event PoolAddressFetched(address indexed tokenA, address indexed tokenB, uint24 fee, address pool);
    event LiquidityFetched(address indexed poolAddress, uint128 liquidity);
 
-   function getPoolAddress(address tokenA, address tokenB, uint24 fee) external view returns (address pool){
+   function getPoolAddress(address tokenA, address tokenB, uint24 fee) external returns (address pool){
     pool = IUniswapV3Factory(FACTORY_ADDRESS).getPool(tokenA, tokenB, fee);
     emit PoolAddressFetched(tokenA, tokenB, fee, pool);
     return pool;
    }
 
-    function getLiquidity(address poolAddress) external view returns (Info memory){
+    function getLiquidity(address poolAddress) external returns (Info memory){
         require(poolAddress != address(0), "Pool address cannot be zero");
         
         Info memory info;

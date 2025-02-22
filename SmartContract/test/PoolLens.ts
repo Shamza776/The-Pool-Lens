@@ -6,56 +6,56 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import hre from "hardhat";
 
-describe("Lock", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  async function deployOneYearLockFixture() {
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
+console.log("Test file is being read!")
 
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+describe("PoolLens", function () {
+  let poolLens: any;
+  let  owner: any;
 
-    // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await hre.ethers.getSigners();
+  const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+  const KNOWN_POOL = "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8"; // USDC/WETH 0.3% POOL
 
-    const Lock = await hre.ethers.getContractFactory("Lock");
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
-  }
-
-  describe("Deployment", function () {
-    it("Should set the right unlockTime", async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await lock.unlockTime()).to.equal(unlockTime);
-    });
-
-    it("Should set the right owner", async function () {
-      const { lock, owner } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await lock.owner()).to.equal(owner.address);
-    });
-
-    it("Should receive and store the funds to lock", async function () {
-      const { lock, lockedAmount } = await loadFixture(
-        deployOneYearLockFixture
-      );
-
-      expect(await hre.ethers.provider.getBalance(lock.target)).to.equal(
-        lockedAmount
-      );
-    });
-
-    it("Should fail if the unlockTime is not in the future", async function () {
-      // We don't use the fixture here because we want a different deployment
-      const latestTime = await time.latest();
-      const Lock = await hre.ethers.getContractFactory("Lock");
-      await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-        "Unlock time should be in the future"
-      );
-    });
+  before(async function (){
+    console.log("Before hook is running")
+    //enable forking from the mainnet
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [{
+        forking: {
+          jsonRpcUrl: process.env.ALCHEMY_NETWORK_URL,
+          blockNumber: 17000000,
+        }
+      }],
   });
 });
+  beforeEach(async function () {
+    console.log("Before each hook is running")
+    const PoolLensFactory = await hre.ethers.getContractFactory("PoolLens");
+    poolLens = await PoolLensFactory.deploy();
+    console.log("PoolLens deployed to:", poolLens.address);
+    //await poolLens.deployed();
+    [owner] = await hre.ethers.getSigners();
+    console.log("Signer address fetched");
+  });
+
+  describe("getPoolAddress", function () {
+    it("should return the pool address for USD/WETH", async function (){
+      console.log("USDC/WETH 0.3% POOL");
+      const poolAddress = await poolLens.getPoolAddress(USDC, WETH, 3000);
+      console.log("Pool address", poolAddress);
+      expect(poolAddress).to.equal(KNOWN_POOL);
+    })
+  })
+
+  describe("getLiquidity", function (){
+    it("should return the liquidity information for the pool", async function (){
+      console.log("liquidity information for the pool")
+      const info = await poolLens.getLiquidity(KNOWN_POOL);
+      console.log("Liquidity info", info);
+      expect(info.tokenA).to.equal(USDC);
+      expect(info.tokenB).to.equal(WETH);
+    })
+  })
+ 
+})
