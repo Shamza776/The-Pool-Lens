@@ -9,6 +9,8 @@ import "hardhat-deploy";
 import * as dotenv from "dotenv";
 dotenv.config();
 
+// console.log("Sepolia Network URL:", process.env.SEPOLIA_NETWORK_URL);
+// console.log("Private Key:", process.env.PRIVATE_KEY);
 
 const config: HardhatUserConfig = {
   solidity: "0.8.28",
@@ -25,7 +27,14 @@ const config: HardhatUserConfig = {
         blockNumber: 17000000,
       },
     },
+    "lisk-sepolia": {
+      url: process.env.SEPOLIA_NETWORK_URL || "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+    "ethereum-sepolia":{
+      url: process.env.SEPOLIA_NETWORK_URL_ETH || "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    }
   }
 };
-
 export default config;
