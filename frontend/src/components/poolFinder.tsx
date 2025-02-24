@@ -3,7 +3,7 @@ import { contractAddress } from "../utils/contractAddress";
 import { ethers } from "ethers";
 import detectEthereumProvider from "@metamask/detect-provider";
 import { useState } from "react";
-
+import "/src/App.css";
 
 function PoolFinder(){
 
@@ -35,7 +35,7 @@ function PoolFinder(){
             <p>Enter token A</p>
             <input type="text" placeholder="Enter token A address" value={tokenA} onChange={(e) => setTokenA(e.target.value)} />
             <p>Enter token B</p>
-            <input type="text" placeholder="Enter token B"  value={tokenB} onChange={(e) => setTokenB(e.target.value)} />
+            <input type="text" placeholder="Enter token B address"  value={tokenB} onChange={(e) => setTokenB(e.target.value)} />
             <p>Enter amount</p>
             <input type="text" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
             <button onClick={() => getPoolAddress(tokenA, tokenB, amount)} disabled={loading}>

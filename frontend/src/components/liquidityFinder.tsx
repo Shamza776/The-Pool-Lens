@@ -4,6 +4,7 @@ import { contractAddress } from "../utils/contractAddress";
 import { ethers } from "ethers";
 import detectEthereumProvider from "@metamask/detect-provider";
 import { useState } from "react";
+import '/src/App.css'
 
 
 function Liquidity(){
@@ -20,12 +21,14 @@ function Liquidity(){
   }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   
   //getLiquidity function
   const getLiquidity = async function getLiquidity(poolAddress: string) {
     try {
       setLoading(true);
+      setShowInfo(false);
       setError(null);
       const ethereumProvider: any = await detectEthereumProvider();
       const provider = new ethers.BrowserProvider(ethereumProvider);
@@ -43,6 +46,7 @@ function Liquidity(){
         tokenBSymbol: liquidity.tokenBSymbol,
       };
       setPoolInfo(info);
+      setShowInfo(true);
 
       // Save to local storage
       const history = JSON.parse(localStorage.getItem("history") || "[]");
@@ -62,19 +66,22 @@ return (
     </div>
     <h1>Welcome to PoolEnd</h1>
     <p>
-      Welcome to PoolEnd, your gateway to decentralized finance (DeFi) on the
+      Welcome to PoolLens, your gateway to decentralized finance (DeFi) on the
       Ethereum network. Our platform empowers users to access
       pool addresses and retrieve detailed liquidity information
       from any provided pool address. Whether you're a seasoned
-      DeFi enthusiast or just getting started, PoolEnd offers a seamless and intuitive experience.
+      DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
     </p>
     <p>
-      Pool Address Lookup: Easily find and verify pool addresses on the Ethereum 
-      network.
-
-      Liquidity Information: Access detailed liquidity data, including total liquidity,
-      pool composition, and historical trends.
-    </p>
+      <ol>
+        <li>
+          <strong>Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
+        </li>
+        <li>
+          <strong>Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
+        </li>
+      </ol>
+      </p>
     <p className="read-the-docs">
       Enter pool address
     </p>
@@ -83,12 +90,12 @@ return (
       placeholder="Enter pool address"
       value={poolAddress}
       onChange={(e) => setPoolAddress(e.target.value)}
-    />
+    /> <br />
     <button onClick={() => getLiquidity(poolAddress)} disabled={loading || !poolAddress} >
       {loading ? "Loading..." : "Get Liquidity"}
       </button>
       {error && <p className="error">{error}</p>}
-      {poolInfo && (
+      {showInfo && poolInfo && (
         <div>
           <h2>Liquidity Information</h2>
           <p>Pool Address: {poolInfo.poolAddress}</p>
