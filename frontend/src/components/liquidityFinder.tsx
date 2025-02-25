@@ -12,10 +12,10 @@ function Liquidity(){
   const [poolAddress, setPoolAddress] = useState("");
   const [poolInfo, setPoolInfo] = useState<{
     poolAddress?: string;
-    liquidity?: string;
+    liquidity?: bigint;
     tokenA?: string;
     tokenB?: string;
-    fee?: string;
+    fee?: number;
     tokenASymbol?: string;
     tokenBSymbol?: string;
   }>({});
@@ -26,15 +26,31 @@ function Liquidity(){
   
   //getLiquidity function
   const getLiquidity = async function getLiquidity(poolAddress: string) {
+    console.log("using address: ", poolAddress);
     try {
       setLoading(true);
       setShowInfo(false);
       setError(null);
       const ethereumProvider: any = await detectEthereumProvider();
-      const provider = new ethers.BrowserProvider(ethereumProvider);
-      const signer = await provider.getSigner();
+      if (!ethereumProvider) {
+        throw new Error("Please install MetaMask to use this feature.");
+      }
+
+      // function validateAddress(address: string): string {
+      //   try {
+      //     return ethers.getAddress(address); // This automatically checks and returns a checksummed address
+      //   } catch (error) {
+      //     throw new Error("Invalid address format");
+      //   }
+      // }
+      
+      //const provider = new ethers.BrowserProvider(ethereumProvider);
+      //const signer = await provider.getSigner();
+      const signer = new ethers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU")
       const contract = new ethers.Contract(contractAddress, contractABI, signer);
-      const liquidity = await contract.getLiquidity(poolAddress);
+      const validatedAddress = ethers.getAddress(poolAddress);
+      const liquidity = await contract.getLiquidity(validatedAddress);
+      console.log("Liquidity:", liquidity);
 
       const info = {
         poolAddress: liquidity.poolAddress,
@@ -73,14 +89,14 @@ return (
       DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
     </p>
     <p>
-      <ol>
-        <li>
-          <strong>Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
-        </li>
-        <li>
-          <strong>Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
-        </li>
-      </ol>
+    <ol>
+      <li>
+        <strong>Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
+      </li>
+      <li>
+        <strong>Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
+      </li>
+    </ol>
       </p>
     <p className="read-the-docs">
       Enter pool address
@@ -102,7 +118,7 @@ return (
           <p>Liquidity</p>
           <p>Token A: {poolInfo.tokenA}</p>
           <p>Token B: {poolInfo.tokenB}</p>
-          <p>Fee: {poolInfo.fee}</p>
+          <p>Fee: {poolInfo.fee !== undefined ? poolInfo.fee / 10000 : 'N/A'} </p>
           <p>Token A Symbol: {poolInfo.tokenASymbol}</p>
           <p>Token B Symbol: {poolInfo.tokenBSymbol}</p>
           </div>
