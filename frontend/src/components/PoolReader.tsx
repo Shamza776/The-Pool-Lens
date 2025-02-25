@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ethers } from "ethers";
 import ConnectWallet from "./connectWallet";
 
-// Uniswap V3 Pool ABI (minimal version )
+// Uniswap V3 Pool ABI (minimal version)
 const POOL_ABI = [
   "function token0() external view returns (address)",
   "function token1() external view returns (address)",
@@ -13,6 +13,17 @@ const POOL_ABI = [
 const ERC20_ABI = [
   "function symbol() external view returns (string)"
 ];
+
+type PoolInfo = {
+  poolAddress: string;
+  liquidity: string;
+  tokenA: string;
+  tokenB: string;
+  fee: number;
+  tokenASymbol: string;
+  tokenBSymbol: string;
+  timestamp: number; // Add timestamp for sorting by most recent
+};
 
 function MainnetPoolLens() {
   const [poolAddress, setPoolAddress] = useState("");
@@ -55,17 +66,28 @@ function MainnetPoolLens() {
         token1Contract.symbol()
       ]);
 
-      const info = {
+      const info: PoolInfo = {
         poolAddress,
-        liquidity: liquidity,
+        liquidity: liquidity.toString(),
         tokenA: token0,
         tokenB: token1,
         fee: Number(fee),
         tokenASymbol: symbol0,
-        tokenBSymbol: symbol1
+        tokenBSymbol: symbol1,
+        timestamp: Date.now() // Add current timestamp
       };
 
       setPoolInfo(info);
+      
+      // Get existing history from localStorage
+      const existingHistoryJSON = localStorage.getItem('poolHistory');
+      const existingHistory: PoolInfo[] = existingHistoryJSON ? JSON.parse(existingHistoryJSON) : [];
+      
+      // Add new entry to history and keep only the 10 most recent
+      const updatedHistory = [info, ...existingHistory].slice(0, 10);
+      
+      // Save updated history to localStorage
+      localStorage.setItem('poolHistory', JSON.stringify(updatedHistory));
 
     } catch (err: any) {
       console.error("Error:", err);
@@ -77,33 +99,31 @@ function MainnetPoolLens() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Mainnet Pool Lens</h1>
+      <h1 className="text-2xl font-bold mb-4 text-orange-600">Mainnet Pool Lens</h1>
       <div>
-      <ConnectWallet />
-    </div>
-    <h1>Welcome to Pool Lens</h1>
-    <p>
-      Welcome to PoolLens, your gateway to decentralized finance (DeFi) on the
-      Ethereum network. Our platform empowers users to access
-      pool addresses and retrieve detailed liquidity information
-      from any provided pool address. Whether you're a seasoned
-      DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
-    </p>
-    <p>
-    <ol>
-      <li>
-        <strong>Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
-      </li>
-      <li>
-        <strong>Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
-      </li>
-    </ol>
+        <ConnectWallet />
+      </div>
+      <h1 className="text-3xl font-bold mb-6 text-orange-600">Welcome to Pool Lens</h1>
+      <p className="mb-4 text-gray-300">
+        Welcome to PoolLens, your gateway to decentralized finance (DeFi) on the
+        Ethereum network. Our platform empowers users to access
+        pool addresses and retrieve detailed liquidity information
+        from any provided pool address. Whether you're a seasoned
+        DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
       </p>
+      <ol className="mb-6 space-y-2">
+        <li>
+          <strong className="text-gray-200">Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
+        </li>
+        <li>
+          <strong className="text-gray-200">Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
+        </li>
+      </ol>
       
       <div className="mb-4">
         <input
           type="text"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
           placeholder="Enter Uniswap V3 pool address"
           value={poolAddress}
           onChange={(e) => setPoolAddress(e.target.value)}
@@ -111,7 +131,7 @@ function MainnetPoolLens() {
       </div>
 
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        className="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-orange-700"
         onClick={() => getLiquidity(poolAddress)}
         disabled={loading || !poolAddress}
       >
@@ -119,17 +139,17 @@ function MainnetPoolLens() {
       </button>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mt-4 p-4 bg-red-900 border border-red-700 text-red-200 rounded">
           {error}
         </div>
       )}
 
       {poolInfo && (
-        <div className="mt-4 p-4 border rounded">
-          <h2 className="text-xl font-bold mb-2">Pool Information</h2>
+        <div className="mt-4 p-4 border rounded border-gray-700 bg-gray-800">
+          <h2 className="text-xl font-bold mb-2 text-orange-500">Pool Information</h2>
           <div className="grid gap-2">
             <p><strong>Pool Address:</strong> {poolInfo.poolAddress}</p>
-            <p><strong>Liquidity:</strong> {poolInfo.liquidity.toString()}</p>
+            <p><strong>Liquidity:</strong> {poolInfo.liquidity}</p>
             <p><strong>Token A:</strong> {poolInfo.tokenA} ({poolInfo.tokenASymbol})</p>
             <p><strong>Token B:</strong> {poolInfo.tokenB} ({poolInfo.tokenBSymbol})</p>
             <p><strong>Fee Tier:</strong> {poolInfo.fee / 10000}%</p>
