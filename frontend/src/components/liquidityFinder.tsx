@@ -46,7 +46,6 @@ function Liquidity(){
       
       const provider = new ethers.BrowserProvider(ethereumProvider);
       const signer = await provider.getSigner();
-      //const signer = new ethers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU")
       const contract = new ethers.Contract(contractAddress, contractABI, signer);
       const validatedAddress = ethers.getAddress(poolAddress);
       const liquidity = await contract.getLiquidity(validatedAddress);
