@@ -15,9 +15,9 @@ describe("PoolLens", function () {
   let poolLens: any;
   let  owner: any;
 
-  const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-  const KNOWN_POOL = "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8"; // USDC/WETH 0.3% POOL
+  const USDC = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+  const WETH = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
+  const KNOWN_POOL = "0x5B8B635C2665791cf62fe429cB149EaB42A3cEd8"; // USDC/WETH 0.3% POOL
 
   before(async function (){
     console.log("Before hook is running")
