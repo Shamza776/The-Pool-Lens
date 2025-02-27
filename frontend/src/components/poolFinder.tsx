@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useNavigate} from 'react-router-dom'
+import networks from "./networkData";
 import "/src/App.css";
+import LiskNetwork from "./liskNetwork";
+
 
 // Uniswap V3 Factory ABI (minimal version with getPool function)
 const FACTORY_ABI = [
@@ -16,6 +20,7 @@ const ERC20_ABI = [
 const FACTORY_ADDRESS = "0x1F98431c8aD98523631AE4a59f267346ea31F984";
 
 function PoolFinder() {
+  const navigate = useNavigate();
   const [poolAddress, setPoolAddress] = useState("");
   const [tokenA, setTokenA] = useState("");
   const [tokenB, setTokenB] = useState("");
@@ -24,8 +29,32 @@ function PoolFinder() {
   const [error, setError] = useState<string | null>(null);
   const [tokenASymbol, setTokenASymbol] = useState("");
   const [tokenBSymbol, setTokenBSymbol] = useState("");
+  const [selectedNetwork, setSelectedNetwork] = useState<any>(null)
+
+  //get selected network from localstorage
+  useEffect(() => {
+    const networkId = localStorage.getItem('selectedNetwork');
+    if (!networkId) {
+      alert("Please select a network first");
+      navigate("/networks");
+      return;
+    }
+
+    const network = networks.find((net: { id: string; }) => net.id === networkId);
+    if (network) {
+      setSelectedNetwork(network);
+    } else {
+      alert("Invalid network selected");
+      navigate("/networks");
+    }
+  }, [navigate]);
 
   const getPoolAddress = async function(tokenA: string, tokenB: string, fee: string) {
+    if (!selectedNetwork) {
+      setError("No network selected. Please go back and select a network.");
+      return;
+    }
+    
     if (!ethers.isAddress(tokenA)) {
       setError("Invalid token A address format");
       return;
@@ -50,12 +79,10 @@ function PoolFinder() {
       setTokenBSymbol("");
 
       // Connect to mainnet
-      const provider = new ethers.JsonRpcProvider(
-        "https://eth-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
-      );
+      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc );
 
       // Create factory contract instance
-      const factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
+      const factoryContract = new ethers.Contract(selectedNetwork.FACTORY_ADDRESS, FACTORY_ABI, provider);
 
       // Sort token addresses (Uniswap requires tokenA < tokenB)
       const [token0, token1] = tokenA.toLowerCase() < tokenB.toLowerCase() 
@@ -104,6 +131,7 @@ function PoolFinder() {
         fee: feeValue,
         tokenASymbol,
         tokenBSymbol,
+        network: selectedNetwork.id,
         timestamp: Date.now()
       };
 
@@ -120,6 +148,12 @@ function PoolFinder() {
       setLoading(false);
     }
   };
+  if (!selectedNetwork) {
+    return <div>Loading...</div>;
+  }
+  if (selectedNetwork.id === "Lisk"){
+    return <LiskNetwork/>
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -127,6 +161,12 @@ function PoolFinder() {
       <p className="mb-2 text-gray-300">
         Find a Uniswap V3 pool address by providing the token addresses and fee tier.
       </p>
+      <div className="flex items-center">
+          <img src={selectedNetwork.image} alt={selectedNetwork.name} className="w-6 h-6 mr-2" />
+          <p className="text-gray-200">
+            <span className="font-bold">{selectedNetwork.name}</span> Network Selected
+          </p>
+      </div>
 
       <div className="space-y-4 mb-6">
         <div>
@@ -192,6 +232,7 @@ function PoolFinder() {
           </div>
         </div>
       )}
+      
     </div>
   );
 }

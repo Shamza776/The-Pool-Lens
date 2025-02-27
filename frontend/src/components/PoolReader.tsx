@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ConnectWallet from "./connectWallet";
+import networks from "./networkData";
+import {  useNavigate } from "react-router-dom";
+import ConnectLisk from "./lisk-Network";
 
 // Uniswap V3 Pool ABI (minimal version)
+
 const POOL_ABI = [
   "function token0() external view returns (address)",
   "function token1() external view returns (address)",
@@ -30,9 +34,30 @@ function MainnetPoolLens() {
   const [poolInfo, setPoolInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<any>(null)
 
-  const getLiquidity = async (poolAddress: string) => {
-    if (!ethers.isAddress(poolAddress)) { 
+  const navigate = useNavigate()
+  useEffect( () => {
+    const networkId = localStorage.getItem("selectedNetwork");
+    // if(!selectedNetwork){
+    //   alert("Please select Network first")
+    //   return;
+    // }
+
+    const network = networks.find((net: { id: string | null; })  => net.id === networkId);
+    if(network) {
+      setSelectedNetwork(network);
+    } else {
+      alert("Invalid network selected");
+      navigate("/networks");
+    }
+  }, [])
+  const getLiquidity = async (address: string) => {
+    if (!selectedNetwork) {
+      setError("No network selected. Please go back and select a network.");
+      return;
+    }
+    if (!ethers.isAddress(address)) { 
       setError("Invalid address format");
       return;
     }
@@ -42,12 +67,13 @@ function MainnetPoolLens() {
       setError(null);
 
       // Connect to mainnet
-      const provider = new ethers.JsonRpcProvider(
-        "https://eth-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU" 
-      );
+      // const provider = new ethers.JsonRpcProvider(
+      //   "https://eth-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU" 
+      // );
+      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc)
 
       // Create contract instances
-      const poolContract = new ethers.Contract(poolAddress, POOL_ABI, provider);
+      const poolContract = new ethers.Contract(address, POOL_ABI, provider);
 
       // Get pool data
       const [token0, token1, fee, liquidity] = await Promise.all([
@@ -96,31 +122,45 @@ function MainnetPoolLens() {
       setLoading(false);
     }
   };
+    if (!selectedNetwork) {
+      return <div>Loading...</div>;
+    }
+    if (selectedNetwork.id === "Lisk") {
+      return <ConnectLisk />;
+    }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-orange-600">Mainnet Pool Lens</h1>
+      <h1 className="text-2xl font-bold mb-4 text-orange-600">The Pool Lens</h1>
       <div>
         <ConnectWallet />
       </div>
       <h1 className="text-3xl font-bold mb-6 text-orange-600">Welcome to Pool Lens</h1>
       <p className="mb-4 text-gray-300">
-        Welcome to PoolLens, your gateway to decentralized finance (DeFi) on the
-        Ethereum network. Our platform empowers users to access
+        Welcome to Pool Lens! Our platform empowers users to access
         pool addresses and retrieve detailed liquidity information
         from any provided pool address. Whether you're a seasoned
         DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
       </p>
       <ol className="mb-6 space-y-2">
         <li>
-          <strong className="text-gray-200">Pool Address Lookup:</strong> Enter a pool address to verify its existence on the Ethereum network.
+          <strong className="text-gray-200">Pool Address Lookup:</strong> Enter a pool address to verify its existence.
         </li>
         <li>
           <strong className="text-gray-200">Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
         </li>
       </ol>
+      <div className="flex items-center">
+          <img src={selectedNetwork.image} alt={selectedNetwork.name} className="w-6 h-6 mr-2" />
+          <p className="text-gray-200">
+            <span className="font-bold">{selectedNetwork.name}</span> Network Selected
+          </p>
+      </div>
       
       <div className="mb-4">
+      <p className="mb-4 text-gray-300">
+        Enter a Uniswap V3 pool address to retrieve detailed liquidity information.
+      </p>
         <input
           type="text"
           className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
@@ -156,6 +196,11 @@ function MainnetPoolLens() {
           </div>
         </div>
       )}
+      {/* { if network selected is lisk */}
+        {/* {selectedNetwork.id === "Lisk" ? (
+          <ConnectLisk/>
+        )
+      } */}
     </div>
   );
 }
