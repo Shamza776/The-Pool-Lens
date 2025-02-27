@@ -20,9 +20,9 @@ function DisplayNetworks() {
     
     // Navigate to the appropriate page based on user's choice
     if (action === "findPool") {
-      navigate("/pool-finder");
+      navigate("/pool");
     } else if (action === "checkLiquidity") {
-      navigate("/pool-lens");
+      navigate("/PoolReader");
     }
   };
 
@@ -52,7 +52,6 @@ function DisplayNetworks() {
               />
               <p className="font-bold text-gray-200">{network.name}</p>
             </div>
-            <p className="text-sm text-gray-400">{network.description}</p>
           </div>
         ))}
       </div>

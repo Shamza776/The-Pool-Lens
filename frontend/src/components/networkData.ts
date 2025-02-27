@@ -48,6 +48,11 @@ const networks : any = [
         name: "Base Mainnet",
         image: "frontend\src\assets\base.png",
         rpc: "https://base-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
+    },
+    {
+        id: "Lisk",
+        name: "Lisk Sepolia",
+        image: "frontend\src\assets\lisk.png",
     }
 ]
 export default networks;
