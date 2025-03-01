@@ -22,10 +22,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: {
-        url: process.env.ALCHEMY_NETWORK_URL || "",
-        blockNumber: 17000000,
-      },
+      // forking: {
+      //   url: process.env.ALCHEMY_NETWORK_URL || "",
+      //   blockNumber: 17000000,
+      // },
+    },
+    localhost:{
+      url: "http://127.0.0.1:8545",
     },
     "lisk-sepolia": {
       url: process.env.SEPOLIA_NETWORK_URL || "",
