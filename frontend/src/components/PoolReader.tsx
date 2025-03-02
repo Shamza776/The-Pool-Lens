@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ConnectWallet from "./connectWallet";
 import networks from "./networkData";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ConnectLisk from "./lisk-Network";
+import BookMark from "./bookMark";
+import './PoolReader.css';
 
 // Uniswap V3 Pool ABI (minimal version)
-
 const POOL_ABI = [
   "function token0() external view returns (address)",
   "function token1() external view returns (address)",
@@ -29,7 +30,7 @@ type PoolInfo = {
   timestamp: number; // Add timestamp for sorting by most recent
 };
 
-function MainnetPoolLens() {
+function PoolReader() {
   const [poolAddress, setPoolAddress] = useState("");
   const [poolInfo, setPoolInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -37,21 +38,18 @@ function MainnetPoolLens() {
   const [selectedNetwork, setSelectedNetwork] = useState<any>(null)
 
   const navigate = useNavigate()
-  useEffect( () => {
+  
+  useEffect(() => {
     const networkId = localStorage.getItem("selectedNetwork");
-    // if(!selectedNetwork){
-    //   alert("Please select Network first")
-    //   return;
-    // }
-
-    const network = networks.find((net: { id: string | null; })  => net.id === networkId);
+    const network = networks.find((net: { id: string | null; }) => net.id === networkId);
     if(network) {
       setSelectedNetwork(network);
     } else {
       alert("Invalid network selected");
       navigate("/networks");
     }
-  }, [])
+  }, []);
+
   const getLiquidity = async (address: string) => {
     if (!selectedNetwork) {
       setError("No network selected. Please go back and select a network.");
@@ -66,11 +64,7 @@ function MainnetPoolLens() {
       setLoading(true);
       setError(null);
 
-      // Connect to mainnet
-      // const provider = new ethers.JsonRpcProvider(
-      //   "https://eth-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU" 
-      // );
-      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc)
+      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc);
 
       // Create contract instances
       const poolContract = new ethers.Contract(address, POOL_ABI, provider);
@@ -122,48 +116,53 @@ function MainnetPoolLens() {
       setLoading(false);
     }
   };
-    if (!selectedNetwork) {
-      return <div>Loading...</div>;
-    }
-    if (selectedNetwork.id === "Lisk") {
-      return <ConnectLisk />;
-    }
+
+  if (!selectedNetwork) {
+    return <div className="loading-message">Loading...</div>;
+  }
+  
+  if (selectedNetwork.id === "Lisk") {
+    return <ConnectLisk />;
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-orange-600">The Pool Lens</h1>
-      <div>
+    <div className="pool-finder-container">
+      <h1 className="page-title">The Pool Lens</h1>
+      <div className="wallet-container">
         <ConnectWallet />
       </div>
-      <h1 className="text-3xl font-bold mb-6 text-orange-600">Welcome to Pool Lens</h1>
-      <p className="mb-4 text-gray-300">
+      <h1 className="welcome-title">Welcome to Pool Lens</h1>
+      <p className="page-description">
         Welcome to Pool Lens! Our platform empowers users to access
         pool addresses and retrieve detailed liquidity information
         from any provided pool address. Whether you're a seasoned
         DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
       </p>
-      <ol className="mb-6 space-y-2">
+      <ol className="feature-list">
         <li>
-          <strong className="text-gray-200">Pool Address Lookup:</strong> Enter a pool address to verify its existence.
+          <strong className="feature-highlight">Pool Address Lookup:</strong> Enter a pool address from the selected network to verify its existence.
         </li>
         <li>
-          <strong className="text-gray-200">Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
+          <strong className="feature-highlight">Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
+        </li>
+        <li>
+          <strong className="feature-highlight">Network Connection:</strong> Make sure to connect your Metamask wallet and switch to Lisk-Sepolia network to add a bookmark. 
         </li>
       </ol>
-      <div className="flex items-center">
-          <img src={selectedNetwork.image} alt={selectedNetwork.name} className="w-6 h-6 mr-2" />
-          <p className="text-gray-200">
-            <span className="font-bold">{selectedNetwork.name}</span> Network Selected
-          </p>
+      <div className="network-display">
+        <img src={selectedNetwork.image} alt={selectedNetwork.name} className="network-image" />
+        <p className="network-name">
+          {selectedNetwork.name}
+        </p>
       </div>
       
-      <div className="mb-4">
-      <p className="mb-4 text-gray-300">
-        Enter a Uniswap V3 pool address to retrieve detailed liquidity information.
-      </p>
+      <div className="input-group">
+        <p className="input-description">
+          Enter a Uniswap V3 pool address to retrieve detailed liquidity information.
+        </p>
         <input
           type="text"
-          className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
+          className="token-input"
           placeholder="Enter Uniswap V3 pool address"
           value={poolAddress}
           onChange={(e) => setPoolAddress(e.target.value)}
@@ -171,7 +170,7 @@ function MainnetPoolLens() {
       </div>
 
       <button
-        className="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-orange-700"
+        className="find-button"
         onClick={() => getLiquidity(poolAddress)}
         disabled={loading || !poolAddress}
       >
@@ -179,30 +178,41 @@ function MainnetPoolLens() {
       </button>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-900 border border-red-700 text-red-200 rounded">
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {poolInfo && (
-        <div className="mt-4 p-4 border rounded border-gray-700 bg-gray-800">
-          <h2 className="text-xl font-bold mb-2 text-orange-500">Pool Information</h2>
-          <div className="grid gap-2">
-            <p><strong>Pool Address:</strong> {poolInfo.poolAddress}</p>
-            <p><strong>Liquidity:</strong> {poolInfo.liquidity}</p>
-            <p><strong>Token A:</strong> {poolInfo.tokenA} ({poolInfo.tokenASymbol})</p>
-            <p><strong>Token B:</strong> {poolInfo.tokenB} ({poolInfo.tokenBSymbol})</p>
-            <p><strong>Fee Tier:</strong> {poolInfo.fee / 10000}%</p>
+        <div className="result-container">
+          <h2 className="result-title">Pool Information</h2>
+          <div className="result-details">
+            <div className="result-detail">
+              <span className="result-label">Pool Address:</span>
+              <span className="result-value">{poolInfo.poolAddress}</span>
+            </div>
+            <div className="result-detail">
+              <span className="result-label">Liquidity:</span>
+              <span className="result-value">{poolInfo.liquidity}</span>
+            </div>
+            <div className="result-detail">
+              <span className="result-label">Token A:</span>
+              <span className="result-value">{poolInfo.tokenA} ({poolInfo.tokenASymbol})</span>
+            </div>
+            <div className="result-detail">
+              <span className="result-label">Token B:</span>
+              <span className="result-value">{poolInfo.tokenB} ({poolInfo.tokenBSymbol})</span>
+            </div>
+            <div className="result-detail">
+              <span className="result-label">Fee Tier:</span>
+              <span className="result-value">{poolInfo.fee / 10000}%</span>
+            </div>
           </div>
+          <BookMark poolAddress={poolInfo.poolAddress} />
         </div>
       )}
-      {/* { if network selected is lisk */}
-        {/* {selectedNetwork.id === "Lisk" ? (
-          <ConnectLisk/>
-        )
-      } */}
     </div>
   );
 }
 
-export default MainnetPoolLens;
+export default PoolReader;

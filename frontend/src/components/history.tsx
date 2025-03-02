@@ -13,7 +13,7 @@ type PoolInfo = {
 
 function History() {
   const [history, setHistory] = useState<PoolInfo[]>([]);
-
+  
   // Load history from localStorage when the component mounts
   useEffect(() => {
     const savedHistory = localStorage.getItem('poolHistory');
@@ -21,34 +21,75 @@ function History() {
       setHistory(JSON.parse(savedHistory));
     }
   }, []);
-
+  
   // Format the timestamp
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
-
+  
+  // Handle removing an item from history
+  const handleRemove = (index: number) => {
+    const updatedHistory = [...history];
+    updatedHistory.splice(index, 1);
+    setHistory(updatedHistory);
+    
+    // Update localStorage with the new history
+    localStorage.setItem('poolHistory', JSON.stringify(updatedHistory));
+  };
+  
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-orange-600">Search History</h1>
+    <div className="pool-finder-container">
+      <h1 className="page-title">Search History</h1>
       
       {history.length > 0 ? (
-        <div className="space-y-4">
+        <div className="history-list">
           {history.map((item, index) => (
-            <div key={index} className="p-4 border rounded border-gray-700 bg-gray-800">
-              <h3 className="text-xl font-bold mb-2 text-orange-500">{item.tokenASymbol}/{item.tokenBSymbol} Pool</h3>
-              <div className="grid gap-2">
-                <p><strong>Searched on:</strong> {formatDate(item.timestamp)}</p>
-                <p><strong>Pool Address:</strong> {item.poolAddress}</p>
-                <p><strong>Liquidity:</strong> {item.liquidity}</p>
-                <p><strong>Token A:</strong> {item.tokenA} ({item.tokenASymbol})</p>
-                <p><strong>Token B:</strong> {item.tokenB} ({item.tokenBSymbol})</p>
-                <p><strong>Fee Tier:</strong> {item.fee / 10000}%</p>
+            <div key={index} className="result-container">
+              <div className="result-header">
+                <h2 className="result-title">
+                  {item.tokenASymbol}/{item.tokenBSymbol} Pool
+                </h2>
+                <button 
+                  className="remove-button" 
+                  onClick={() => handleRemove(index)}
+                  aria-label="Remove from history"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="result-details">
+                <div className="result-detail">
+                  <span className="result-label">Searched on:</span>
+                  <span className="result-value">{formatDate(item.timestamp)}</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-label">Pool Address:</span>
+                  <span className="result-value">{item.poolAddress}</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-label">Liquidity:</span>
+                  <span className="result-value">{item.liquidity}</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-label">Token A:</span>
+                  <span className="result-value">{item.tokenA} ({item.tokenASymbol})</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-label">Token B:</span>
+                  <span className="result-value">{item.tokenB} ({item.tokenBSymbol})</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-label">Fee Tier:</span>
+                  <span className="result-value">{item.fee / 10000}%</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-gray-300">No search history available</p>
+        <div className="no-history-message">
+          No search history available
+        </div>
       )}
     </div>
   );

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import networks from "./networkData";
-import "/src/App.css";
 import LiskNetwork from "./liskNetwork";
-
+import "./PoolFinder.css"; // Import the new CSS file
 
 // Uniswap V3 Factory ABI (minimal version with getPool function)
 const FACTORY_ABI = [
@@ -29,9 +28,9 @@ function PoolFinder() {
   const [error, setError] = useState<string | null>(null);
   const [tokenASymbol, setTokenASymbol] = useState("");
   const [tokenBSymbol, setTokenBSymbol] = useState("");
-  const [selectedNetwork, setSelectedNetwork] = useState<any>(null)
+  const [selectedNetwork, setSelectedNetwork] = useState<any>(null);
 
-  //get selected network from localstorage
+  // Get selected network from localStorage
   useEffect(() => {
     const networkId = localStorage.getItem('selectedNetwork');
     if (!networkId) {
@@ -78,11 +77,15 @@ function PoolFinder() {
       setTokenASymbol("");
       setTokenBSymbol("");
 
-      // Connect to mainnet
-      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc );
+      // Connect to network
+      const provider = new ethers.JsonRpcProvider(selectedNetwork.rpc);
 
       // Create factory contract instance
-      const factoryContract = new ethers.Contract(selectedNetwork.FACTORY_ADDRESS, FACTORY_ABI, provider);
+      const factoryContract = new ethers.Contract(
+        FACTORY_ADDRESS, // Use the constant FACTORY_ADDRESS
+        FACTORY_ABI, 
+        provider
+      );
 
       // Sort token addresses (Uniswap requires tokenA < tokenB)
       const [token0, token1] = tokenA.toLowerCase() < tokenB.toLowerCase() 
@@ -148,53 +151,58 @@ function PoolFinder() {
       setLoading(false);
     }
   };
+
   if (!selectedNetwork) {
-    return <div>Loading...</div>;
+    return <div className="pool-finder-container">Loading network data...</div>;
   }
-  if (selectedNetwork.id === "Lisk"){
-    return <LiskNetwork/>
+
+  if (selectedNetwork.id === "Lisk") {
+    return <LiskNetwork />;
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-orange-600">Pool Finder</h1>
-      <p className="mb-2 text-gray-300">
+    <div className="pool-finder-container">
+      <h1 className="page-title">Pool Finder</h1>
+      <p className="page-description">
         Find a Uniswap V3 pool address by providing the token addresses and fee tier.
       </p>
-      <div className="flex items-center">
-          <img src={selectedNetwork.image} alt={selectedNetwork.name} className="w-6 h-6 mr-2" />
-          <p className="text-gray-200">
-            <span className="font-bold">{selectedNetwork.name}</span> Network Selected
-          </p>
+      
+      <div className="network-display">
+        <img 
+          src={selectedNetwork.image} 
+          alt={selectedNetwork.name} 
+          className="network-image" 
+        />
+        <span className="network-name">{selectedNetwork.name}</span>
       </div>
 
-      <div className="space-y-4 mb-6">
-        <div>
-          <p className="mb-1 text-gray-200">Token A Address</p>
+      <div className="form-container">
+        <div className="input-group">
+          <label className="input-label">Token A Address</label>
           <input 
             type="text" 
-            className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
+            className="token-input"
             placeholder="Enter token A address (e.g., 0x...)" 
             value={tokenA} 
             onChange={(e) => setTokenA(e.target.value)} 
           />
         </div>
 
-        <div>
-          <p className="mb-1 text-gray-200">Token B Address</p>
+        <div className="input-group">
+          <label className="input-label">Token B Address</label>
           <input 
             type="text" 
-            className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
+            className="token-input"
             placeholder="Enter token B address (e.g., 0x...)" 
             value={tokenB} 
             onChange={(e) => setTokenB(e.target.value)} 
           />
         </div>
 
-        <div>
-          <p className="mb-1 text-gray-200">Fee Tier</p>
+        <div className="input-group">
+          <label className="input-label">Fee Tier</label>
           <select 
-            className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700"
+            className="fee-select"
             value={fee} 
             onChange={(e) => setFee(e.target.value)}
           >
@@ -206,33 +214,46 @@ function PoolFinder() {
         </div>
 
         <button 
-          className="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-orange-700"
+          className="find-button"
           onClick={() => getPoolAddress(tokenA, tokenB, fee)} 
           disabled={loading || !tokenA || !tokenB}
         >
-          {loading ? "Loading..." : "Get Pool Address"}
+          {loading ? "Searching..." : "Get Pool Address"}
         </button>
       </div>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-900 border border-red-700 text-red-200 rounded">
-          {error}
+        <div className="error-message">
+          <strong>Error:</strong> {error}
         </div>
       )}
 
       {poolAddress && (
-        <div className="mt-4 p-4 border rounded border-gray-700 bg-gray-800">
-          <h2 className="text-xl font-bold mb-2 text-orange-500">Pool Found!</h2>
-          <div className="grid gap-2">
-            <p><strong>Pool Address:</strong> {poolAddress}</p>
-            {(tokenASymbol && tokenBSymbol) && (
-              <p><strong>Pool Pair:</strong> {tokenASymbol} / {tokenBSymbol}</p>
-            )}
-            <p><strong>Fee Tier:</strong> {Number(fee) / 10000}%</p>
+        <div className="result-container">
+          <h2 className="result-title">Pool Found</h2>
+          
+          <div className="result-detail">
+            <span className="result-label">Pool Address</span>
+            <code className="result-value">{poolAddress}</code>
+          </div>
+          
+          {(tokenASymbol && tokenBSymbol) && (
+            <div className="result-detail">
+              <span className="result-label">Pool Pair</span>
+              <div className="pool-pair result-value">
+                <span className="token-symbol">{tokenASymbol}</span>
+                <span className="divider">/</span>
+                <span className="token-symbol">{tokenBSymbol}</span>
+              </div>
+            </div>
+          )}
+          
+          <div className="result-detail">
+            <span className="result-label">Fee Tier</span>
+            <span className="result-value">{Number(fee) / 10000}%</span>
           </div>
         </div>
       )}
-      
     </div>
   );
 }

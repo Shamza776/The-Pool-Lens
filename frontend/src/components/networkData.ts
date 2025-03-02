@@ -1,58 +1,64 @@
-// interface Network {
-//     id: string;
-//     name: string;
-//     image: string;
-//     rpc: string;
-// };
+// Import all images at the top of the file
+import ethereumLogo from "../assets/ethereum.png";
+import optimismLogo from "../assets/optimism.png";
+import arbitrumLogo from "../assets/arbitrum.png";
+import polygonLogo from "../assets/polygon.png";
+import fantomLogo from "../assets/fantom.png";
+import avalancheLogo from "../assets/avalanche.png";
+import baseLogo from "../assets/base.png";
 
-const networks : any = [
+
+// Interface for type checking
+interface Network {
+    id: string;
+    name: string;
+    image: string;
+    rpc: string;
+}
+
+const networks: Network[] = [
     {
         id: "Ethereum",
         name: "Ethereum Mainnet",
-        image: "../assets/ethereum.png",
+        image: ethereumLogo,
         rpc: "https://eth-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
     },
     {
         id: "OP Mainnet",
-        name: " Optimism Mainnet",
-        image:"frontend\src\assets\optimism.png" ,
+        name: "Optimism Mainnet",
+        image: optimismLogo,
         rpc: "https://opt-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
     },
     {
         id: "Arbitrum",
         name: "Arbitrum Mainnet",
-        image: "frontend\src\assets\arbitrum.png",
+        image: arbitrumLogo,
         rpc: "https://arb-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
     },
     {
         id: "Polygon",
         name: "Polygon Mainnet",
-        image: "frontend\src\assets\polygon.png",
+        image: polygonLogo,
         rpc: "https://polygon-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
-        
     },
     {
         id: "Fantom Opera",
         name: "Fantom Mainnet",
-        image: "frontend\src\assets\fantom.png",
+        image: fantomLogo,
         rpc: "https://fantom-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
     },
     {
         id: "Avalanche",
         name: "Avalanche Mainnet",
-        image:"frontend\src\assets\avalanche.png",
+        image: avalancheLogo,
         rpc: "https://avalanche-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
     },
     {
-        id : "Base",
+        id: "Base",
         name: "Base Mainnet",
-        image: "frontend\src\assets\base.png",
+        image: baseLogo,
         rpc: "https://base-mainnet.g.alchemy.com/v2/t0q4rmOWqfNSwebEsVtHyqYzVK3mFZSU"
-    },
-    {
-        id: "Lisk",
-        name: "Lisk Sepolia",
-        image: "frontend\src\assets\lisk.png",
     }
-]
+];
+
 export default networks;
