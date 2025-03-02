@@ -24,6 +24,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0"
   },
+  "homepage": "https://Shamza776.github.io/The-Pool-Lens",
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@types/react": "^19.0.10",
@@ -38,3 +39,4 @@
     "vite": "^6.1.0"
   }
 }
+ 
