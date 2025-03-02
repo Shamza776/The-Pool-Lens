@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import ConnectWallet from "./connectWallet";
 import networks from "./networkData";
 import { useNavigate } from "react-router-dom";
-import ConnectLisk from "./lisk-Network";
+// import ConnectLisk from "./lisk-Network";
 import BookMark from "./bookMark";
 import './PoolReader.css';
 
@@ -44,11 +44,11 @@ function PoolReader() {
     const network = networks.find((net: { id: string | null; }) => net.id === networkId);
     if(network) {
       setSelectedNetwork(network);
-    } else {
-      alert("Invalid network selected");
-      navigate("/networks");
-    }
+    } 
   }, []);
+  const redirectToNetworkSelection = () => {
+    navigate("/network");
+  };
 
   const getLiquidity = async (address: string) => {
     if (!selectedNetwork) {
@@ -117,13 +117,10 @@ function PoolReader() {
     }
   };
 
-  if (!selectedNetwork) {
-    return <div className="loading-message">Loading...</div>;
-  }
+  // if (!selectedNetwork) {
+  //   return <div className="loading-message">Loading...</div>;
+  // }
   
-  if (selectedNetwork.id === "Lisk") {
-    return <ConnectLisk />;
-  }
 
   return (
     <div className="pool-finder-container">
@@ -131,6 +128,7 @@ function PoolReader() {
       <div className="wallet-container">
         <ConnectWallet />
       </div>
+      
       <h1 className="welcome-title">Welcome to Pool Lens</h1>
       <p className="page-description">
         Welcome to Pool Lens! Our platform empowers users to access
@@ -139,6 +137,9 @@ function PoolReader() {
         DeFi enthusiast or just getting started, PoolLens offers a seamless and intuitive experience.
       </p>
       <ol className="feature-list">
+      <li>
+          <strong className="feature-highlight">Network Selection:</strong> Navigate to Networks, select a network first!
+        </li>
         <li>
           <strong className="feature-highlight">Pool Address Lookup:</strong> Enter a pool address from the selected network to verify its existence.
         </li>
@@ -146,15 +147,40 @@ function PoolReader() {
           <strong className="feature-highlight">Liquidity Information:</strong> Retrieve detailed liquidity information, including total liquidity, pool composition, and historical trends.
         </li>
         <li>
-          <strong className="feature-highlight">Network Connection:</strong> Make sure to connect your Metamask wallet and switch to Lisk-Sepolia network to add a bookmark. 
+          <strong className="feature-highlight">Wallet Connection:</strong> Make sure to connect your Metamask wallet and switch to Lisk-Sepolia network to add a bookmark. 
         </li>
       </ol>
-      <div className="network-display">
+      {selectedNetwork ? (
+        <div className="network-display">
+          <img src={selectedNetwork.image} alt={selectedNetwork.name} className="network-image" />
+          <p className="network-name">
+            {selectedNetwork.name}
+          </p>
+          <button 
+            className="change-network-button"
+            onClick={redirectToNetworkSelection}
+          >
+            Change Network
+          </button>
+        </div>
+      ) : (
+        <div className="no-network-display">
+          <p className="no-network-text">No network selected. Please select a network to use all features.</p>
+          <button 
+            className="select-network-button"
+            onClick={redirectToNetworkSelection}
+          >
+            Select Network
+          </button>
+        </div>
+      )}
+      
+      {/* <div className="network-display">
         <img src={selectedNetwork.image} alt={selectedNetwork.name} className="network-image" />
         <p className="network-name">
           {selectedNetwork.name}
         </p>
-      </div>
+      </div> */}
       
       <div className="input-group">
         <p className="input-description">

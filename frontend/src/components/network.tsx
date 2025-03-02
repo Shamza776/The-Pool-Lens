@@ -16,10 +16,10 @@ function DisplayNetworks() {
   };
   
   const proceedToAction = (action: string) => {
-    if (!selectedNetwork) {
-      alert("Please select a network first");
-      return;
-    }
+    // if (!selectedNetwork) {
+    //   alert("Please select a network first");
+    //   return;
+    // }
     
     // Navigate to the appropriate page based on user's choice
     if (action === "findPool") {

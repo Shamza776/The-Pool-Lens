@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 //import  ConnectWallet  from './components/connectWallet';
 import PoolFinder from './components/poolFinder';
 //import Liquidity from './components/liquidityFinder';
@@ -22,6 +22,7 @@ function App() {
             <Link to="/network">Network</Link>
           </nav>
           <Routes>
+          <Route path="/" element={<Navigate to="/PoolReader" />} />
             <Route path="/PoolReader" element={<MainnetPoolLens/>} />
             <Route path="/pool" element={<PoolFinder />} />
             <Route path="/BookMarkedList" element={<BookMarkedList />} />
